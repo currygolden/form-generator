@@ -4,8 +4,10 @@ const callbacks = {}
  * 加载一个远程脚本
  * @param {String} src 一个远程脚本
  * @param {Function} callback 回调
+ * 动态加载脚本考虑 浏览器兼容性 | 错误监听处理 | 删除动态标签
  */
 function loadScript(src, callback) {
+  // 同名的id不覆盖
   const existingScript = document.getElementById(src)
   const cb = callback || (() => {})
   if (!existingScript) {
@@ -14,7 +16,9 @@ function loadScript(src, callback) {
     $script.src = src
     $script.id = src
     $script.async = 1
+    // 顺序插入body 标签
     document.body.appendChild($script)
+    // 定义加载完毕
     const onEnd = 'onload' in $script ? stdOnEnd.bind($script) : ieOnEnd.bind($script)
     onEnd($script)
   }

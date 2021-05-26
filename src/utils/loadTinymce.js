@@ -23,6 +23,7 @@ export default function loadTinymce(cb) {
   loadScript(tinymceUrl, () => {
     loading.close()
     // eslint-disable-next-line no-undef
+    // tinymce 变量是脚本加载完自动获取的？
     tinymceObj = tinymce
     cb(tinymceObj)
   })

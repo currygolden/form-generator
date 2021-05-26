@@ -9,6 +9,7 @@
           </a>
         </div>
       </div>
+      <!-- 左侧组件选择区 -->
       <el-scrollbar class="left-scrollbar">
         <div class="components-list">
           <div v-for="(item, listIndex) in leftComponents" :key="listIndex">
@@ -16,6 +17,7 @@
               <svg-icon icon-class="component" />
               {{ item.title }}
             </div>
+            <!-- 拖动容器 -->
             <draggable
               class="components-draggable"
               :list="item.list"
@@ -41,7 +43,7 @@
         </div>
       </el-scrollbar>
     </div>
-
+    <!-- 操作按钮，还有时间旅行的场景 -->
     <div class="center-board">
       <div class="action-bar">
         <el-button icon="el-icon-video-play" type="text" @click="run">
@@ -176,7 +178,7 @@ export default {
       selectComponents,
       layoutComponents,
       labelWidth: 100,
-      drawingList: drawingDefalut,
+      drawingList: drawingDefalut, // 画布数据
       drawingData: {},
       activeId: drawingDefalut[0].formId,
       drawerVisible: false,
@@ -328,6 +330,7 @@ export default {
       this.drawingList.push(clone)
       this.activeFormItem(clone)
     },
+    /* 复制一个组件做的 */
     cloneComponent(origin) {
       const clone = deepClone(origin)
       const config = clone.__config__
@@ -337,6 +340,7 @@ export default {
       tempActiveData = clone
       return tempActiveData
     },
+    /* 每一个组件生成id-key */
     createIdAndKey(item) {
       const config = item.__config__
       config.formId = ++this.idGlobal

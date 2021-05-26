@@ -4,7 +4,7 @@ const publicPath = process.env.BASE_URL
 function splicingPluginUrl(PluginName, version, fileName) {
   return `${CDN}${PluginName}/${version}/${fileName}`
 }
-
+// 一些cdn连接
 export default {
   beautifierUrl: splicingPluginUrl('js-beautify', '1.13.5', 'beautifier.min.js'),
   // monacoEditorUrl: splicingPluginUrl('monaco-editor', '0.19.3', 'min/vs'), // 使用 monaco-editor CDN 链接

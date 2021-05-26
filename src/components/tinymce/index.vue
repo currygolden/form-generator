@@ -4,6 +4,7 @@
 
 <script>
 import loadTinymce from '@/utils/loadTinymce'
+// 配置参数
 import { plugins, toolbar } from './config'
 import { debounce } from 'throttle-debounce'
 
@@ -50,6 +51,7 @@ export default {
         link_title: false,
         nonbreaking_force_tab: true
       }
+      // 常见的组件参数获取的方式，默认参数 + 额外参数
       conf = Object.assign(conf, this.$attrs)
       conf.init_instance_callback = editor => {
         if (this.value) editor.setContent(this.value)
@@ -58,13 +60,16 @@ export default {
       tinymce.init(conf)
     })
   },
+  // 合理的GC策略
   destroyed() {
     this.destroyTinymce()
   },
   methods: {
+    // 输入内容改变优化
     vModel(editor) {
       // 控制连续写入时setContent的触发频率
       const debounceSetContent = debounce(250, editor.setContent)
+      // 函数里全局 watch 监听
       this.$watch('value', (val, prevVal) => {
         if (editor && val !== prevVal && val !== editor.getContent()) {
           if (typeof val !== 'string') val = val.toString()
