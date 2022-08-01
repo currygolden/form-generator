@@ -1,11 +1,12 @@
 import { deepClone } from '@/utils/index'
-
+// 基于json数据渲染成组件实例的核心部分
 const componentChild = {}
 /**
  * 将./slots中的文件挂载到对象componentChild上
  * 文件名为key，对应JSON配置中的__config__.tag
  * 文件内容为value，解析JSON配置中的__slot__
  */
+// 批量引入文件
 const slotsFiles = require.context('./slots', false, /\.js$/)
 const keys = slotsFiles.keys() || []
 keys.forEach(key => {
@@ -13,7 +14,9 @@ keys.forEach(key => {
   const value = slotsFiles(key).default
   componentChild[tag] = value
 })
-
+/**
+ * 自定义v-model的实现，1了解v-model的语法糖；2:给自定义组件提高v-model能力
+  */
 function vModel(dataObject, defaultValue) {
   dataObject.props.value = defaultValue
 
@@ -22,6 +25,7 @@ function vModel(dataObject, defaultValue) {
   }
 }
 
+// 处理slot的子元素dom节点
 function mountSlotFiles(h, confClone, children) {
   const childObjs = componentChild[confClone.__config__.tag]
   if (childObjs) {
@@ -34,6 +38,7 @@ function mountSlotFiles(h, confClone, children) {
   }
 }
 
+// 看起来是处理自定义事件
 function emitEvents(confClone) {
   ['on', 'nativeOn'].forEach(attr => {
     const eventKeyList = Object.keys(confClone[attr] || {})
@@ -49,6 +54,7 @@ function emitEvents(confClone) {
 function buildDataObject(confClone, dataObject) {
   Object.keys(confClone).forEach(key => {
     const val = confClone[key]
+    // 处理表单组件的v-model
     if (key === '__vModel__') {
       vModel.call(this, dataObject, confClone.__config__.defaultValue)
     } else if (dataObject[key] !== undefined) {
@@ -75,7 +81,7 @@ function clearAttrs(dataObject) {
   delete dataObject.attrs.__slot__
   delete dataObject.attrs.__methods__
 }
-
+// h函数所需要的第二个参数
 function makeDataObject() {
   // 深入数据对象：
   // https://cn.vuejs.org/v2/guide/render-function.html#%E6%B7%B1%E5%85%A5%E6%95%B0%E6%8D%AE%E5%AF%B9%E8%B1%A1

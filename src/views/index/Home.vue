@@ -16,6 +16,7 @@
               <svg-icon icon-class="component" />
               {{ item.title }}
             </div>
+            <!-- 每一个节点模版代表的是一个组件数据结构 -->
             <draggable
               class="components-draggable"
               :list="item.list"
@@ -43,6 +44,7 @@
     </div>
 
     <div class="center-board">
+      <!-- 操作条区域 -->
       <div class="action-bar">
         <el-button icon="el-icon-video-play" type="text" @click="run">
           运行
@@ -60,6 +62,7 @@
           清空
         </el-button>
       </div>
+      <!-- 渲染区域 -->
       <el-scrollbar class="center-scrollbar">
         <el-row class="center-board-row" :gutter="formConf.gutter">
           <el-form
@@ -68,7 +71,14 @@
             :disabled="formConf.disabled"
             :label-width="formConf.labelWidth + 'px'"
           >
+            <!-- 表单元素本身可拖拽& -->
             <draggable class="drawing-board" :list="drawingList" :animation="340" group="componentsGroup">
+              <!-- 核心：将组件数据渲染成实际组件
+              1. 基于所设计的数据结构/json,用动态组件
+                1.1 动态组件支持本地组件用注册+组件名形式
+                1.2 也支持远程物料使用打包后的组件对象
+              2. 关键在于数据怎么设计去渲染成组件，这是设计器的核心
+               -->
               <draggable-item
                 v-for="(item, index) in drawingList"
                 :key="item.renderKey"
@@ -89,7 +99,7 @@
         </el-row>
       </el-scrollbar>
     </div>
-
+    <!-- 数据由激活的元素提供，然后绑定到表单元素，所以看起来实时修改联动 -->
     <right-panel
       :active-data="activeData"
       :form-conf="formConf"
@@ -288,9 +298,11 @@ export default {
       // 此时赋值代码可写成 component[dataConsumer] = respData；
       // 但为支持更深层级的赋值（如：dataConsumer的值为'options.data'）,使用setObjectValueReduce
       this.setObjectValueReduce(component, dataConsumer, respData)
+      // 这里是担心响应式丢失？？
       const i = this.drawingList.findIndex(item => item.__config__.renderKey === renderKey)
       if (i > -1) this.$set(this.drawingList, i, component)
     },
+    // 处理来自于接口的数据
     fetchData(component) {
       const { dataType, method, url } = component.__config__
       if (dataType === 'dynamic' && method && url) {
@@ -311,6 +323,7 @@ export default {
         if (t) t.value = val
       }
     },
+    // 激活当前元素
     activeFormItem(currentItem) {
       this.activeData = currentItem
       this.activeId = currentItem.__config__.formId
@@ -325,12 +338,16 @@ export default {
     addComponent(item) {
       const clone = this.cloneComponent(item)
       this.fetchData(clone)
+      // 推入画布
       this.drawingList.push(clone)
+      // 激活当前表单元素
       this.activeFormItem(clone)
     },
+    // 复制组件主要做的事情
     cloneComponent(origin) {
       const clone = deepClone(origin)
       const config = clone.__config__
+      // 组件的某些属性继承于表单的属性
       config.span = this.formConf.span // 生成代码时，会根据span做精简判断
       this.createIdAndKey(clone)
       clone.placeholder !== undefined && (clone.placeholder += config.label)
@@ -341,13 +358,16 @@ export default {
       const config = item.__config__
       config.formId = ++this.idGlobal
       config.renderKey = `${config.formId}${+new Date()}` // 改变renderKey后可以实现强制更新组件
+      // 判断是列表单元素还是行表单元素
       if (config.layout === 'colFormItem') {
         item.__vModel__ = `field${this.idGlobal}`
       } else if (config.layout === 'rowFormItem') {
+        // 行元素拓展componentName属性
         config.componentName = `row${this.idGlobal}`
         !Array.isArray(config.children) && (config.children = [])
         delete config.label // rowFormItem无需配置label属性
       }
+      // 处理子节点的id
       if (Array.isArray(config.children)) {
         config.children = config.children.map(childItem => this.createIdAndKey(childItem))
       }
@@ -364,6 +384,7 @@ export default {
       this.generateConf = data
       func && func(data)
     },
+    // 运行逻辑
     execRun(data) {
       this.AssembleFormData()
       this.drawerVisible = true

@@ -1,4 +1,5 @@
 // 表单属性【右面板】
+// 定义组件的数据协议，本地物料/远程物料也可以基于协议开发
 export const formConf = {
   formRef: 'elForm',
   formModel: 'formData',
